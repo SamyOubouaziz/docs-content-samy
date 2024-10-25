@@ -81,10 +81,12 @@ class AddLinkOnFirstConcept:
     # First if statement toggles on when entering a code block
     if current_line == '```\n' and skip_line_toggle == False:
       skip_line = True
+      skip_line_toggle = True
       return skip_line, skip_line_toggle
     # Second if statement toggles off when exiting a code block
     if current_line == '```\n' and skip_line_toggle == True:
       skip_line = True
+      skip_line_toggle = False
       return skip_line, skip_line_toggle
     # Check if line is a title
     if current_line.startswith(("# ", "## ", "### ", "#### ")) == True and skip_line_toggle == False:
@@ -92,7 +94,7 @@ class AddLinkOnFirstConcept:
       return skip_line, skip_line_toggle
     # Check if term is in bold
 
-    if bool(re.search('**(.*)**', old_string)) == True:
+    if bool(re.search('\*\*(.*)\*\*', old_string)) == True:
       skip_line = True
       return skip_line, skip_line_toggle
     else:
@@ -149,6 +151,8 @@ class AddLinkOnFirstConcept:
 # TODO
 
 # - Add tests
+
+# - Address case where concept is part of a slug/URL "(/(*.)concept(*.)/)"
 
 # - Address case where concept is part of another concept (e.g. "serverless" and "Serverless Framework")
 
