@@ -65,9 +65,9 @@ class AddLinkOnFirstConcept:
           return skip_concept
         
 
-      # Check if occurrence is in code block, frontmatter, or monospace  
+  # Check if occurrence is in code block, frontmatter, or monospace  
   def check_if_skip_line(self, current_line, skip_line_toggle, old_string):
-    # Check if in frontmatter
+    # Check if in frontmatter OK
     skip_line = skip_line_toggle
     if current_line == '---\n' and skip_line_toggle == False:
       skip_line = True
@@ -77,7 +77,7 @@ class AddLinkOnFirstConcept:
       skip_line = True
       skip_line_toggle = False
       return skip_line, skip_line_toggle
-    # Check if in code block
+    # Check if in code block OK
     # First if statement toggles on when entering a code block
     if current_line == '```\n' and skip_line_toggle == False:
       skip_line = True
@@ -88,12 +88,11 @@ class AddLinkOnFirstConcept:
       skip_line = True
       skip_line_toggle = False
       return skip_line, skip_line_toggle
-    # Check if line is a title
+    # Check if line is a title OK
     if current_line.startswith(("# ", "## ", "### ", "#### ")) == True and skip_line_toggle == False:
       skip_line = True
       return skip_line, skip_line_toggle
-    # Check if term is in bold
-
+    # Check if term is in bold NOK
     if bool(re.search('\*\*(.*)\*\*', old_string)) == True:
       skip_line = True
       return skip_line, skip_line_toggle
