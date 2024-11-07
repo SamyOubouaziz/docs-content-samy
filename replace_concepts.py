@@ -1,4 +1,5 @@
 import os
+import re
 
 
 class AddLinkOnFirstConcept:
@@ -31,7 +32,7 @@ class AddLinkOnFirstConcept:
             for line in file:
               concept_specs = []
               if line.startswith("## "):
-                # Removes "## " at the begining of concept line, and appends it the concept to concept_specs
+                # Removes "## " at the beginning of concept line, and appends it the concept to concept_specs
                 concept_specs.append(line.strip("# \n").lower())
                 # Creates the relative path and appends it to concept_specs
                 concept_anchor = file_path.removeprefix(directory_path).removesuffix(".mdx") + "/#" + self.to_kebab_case(line.strip("# \n"))
@@ -64,19 +65,64 @@ class AddLinkOnFirstConcept:
           return skip_concept
         
 
+  # Check if occurrence is in code block, frontmatter, or monospace  
+  def check_if_skip_line(self, current_line, skip_line_toggle, old_string):
+    # Check if in frontmatter OK
+    skip_line = skip_line_toggle
+    if current_line == '---\n' and skip_line_toggle == False:
+      skip_line = True
+      skip_line_toggle = True
+      return skip_line, skip_line_toggle
+    if current_line == '---\n' and skip_line_toggle == True:
+      skip_line = True
+      skip_line_toggle = False
+      return skip_line, skip_line_toggle
+    # Check if in code block OK
+    # First if statement toggles on when entering a code block
+    if current_line == '```\n' and skip_line_toggle == False:
+      skip_line = True
+      skip_line_toggle = True
+      return skip_line, skip_line_toggle
+    # Second if statement toggles off when exiting a code block
+    if current_line == '```\n' and skip_line_toggle == True:
+      skip_line = True
+      skip_line_toggle = False
+      return skip_line, skip_line_toggle
+    # Check if line is a title OK
+    if current_line.startswith(("# ", "## ", "### ", "#### ")) == True and skip_line_toggle == False:
+      skip_line = True
+      return skip_line, skip_line_toggle
+    # Check if term is in bold NOK
+    if bool(re.search('\*\*(.*)\*\*', old_string)) == True:
+      skip_line = True
+      return skip_line, skip_line_toggle
+    else:
+      return skip_line, skip_line_toggle
+    
+
+    # TODO Check if in inline code
+
+
   # WORKING - Version with line-by-line processing
   def line_by_line_replace(self, current_file, old_string, new_string):
     with open(current_file, "r") as file_to_process:
       lines_of_file = file_to_process.readlines()
+    skip_line_toggle = False
     # iterates over each line of the file
     for i in range(len(lines_of_file)):
-      if old_string in lines_of_file[i]:
-        # replace concept once in the line 
-        lines_of_file[i] = lines_of_file[i].replace(old_string, new_string, 1)
-        break
+      # Here, skip_line is used to determine wether the line should be skipped.
+      # skip_line_toggle is used to keep the "True" or "False" state by injecting it in the check_if_skip_line() function
+      skip_line_result = self.check_if_skip_line(lines_of_file[i], skip_line_toggle, old_string)
+      skip_line = skip_line_result[0]
+      skip_line_toggle = skip_line_result[1]
+      if old_string in lines_of_file[i] and skip_line == False:
+      # replace concept once in the line 
+          lines_of_file[i] = lines_of_file[i].replace(old_string, new_string, 1)
+          break
     with open(current_file, "w") as file_to_write:
       file_to_write.writelines(lines_of_file)
     return
+
 
   def replace(self):
       # product = self.select_folder_to_process()
@@ -86,13 +132,13 @@ class AddLinkOnFirstConcept:
       # Looks for each concept in each page
       for file in files_list:
         for concept in concepts_list:
-          skip_concept = False
           old_string = concept[0]
           new_string = f"[{concept[0]}]({concept[1]})"
           current_file=file
           # Check if concept already has link to concepts page
           with open(file) as file_to_check:
-            if new_string not in file_to_check.read() and skip_concept == False:
+            if new_string not in file_to_check.read():
+              # Replace first occurrence of concept
               self.line_by_line_replace(current_file, old_string, new_string)
               # Add test new content and error handling before printing line below
               print(f"{old_string} replaced by {new_string} in file {file}.")
@@ -101,28 +147,15 @@ class AddLinkOnFirstConcept:
           file_to_check.close()
       return
 
-
 # TODO
-
-# - DONE - Check if concept is already present in file before replacing
 
 # - Add tests
 
+# - Address case where concept is part of a slug/URL "(/(*.)concept(*.)/)"
+
 # - Address case where concept is part of another concept (e.g. "serverless" and "Serverless Framework")
 
-# - Make sure capitalized concepts are properly matched and reproduced
-
-# - Try a different replace method using readlines(), then looping through each line to search for concept and easily exclude frontmatter
-
-#   - Frontmatter:
-#     - Enter frontmatter section: If current_line contains "---\n" then switch
-#       on frontmatter_check = True
-#     - If frontmatter_check = True and current_line == "---\n" then switch off
-#       frontmatter_check = False
-#     - If frontmatter_check = True then skip line
-#   
-#   - Code block:
-#     - Same as frontmatter but with "```"
+# - Address case when concept is in plural form (e.g. [job](link)s ). concept must have space or punctuation after (or no letter). 
 
 #   - Monospace
 #     - if concept is between "`[any string]`" and "`[any string]`" then DO NOT skip line

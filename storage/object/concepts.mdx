@@ -5,7 +5,7 @@ meta:
 content:
   h1: Object Storage - Concepts
   paragraph: Understand key concepts and features of Scaleway Object Storage.
-tags: retention endpoint object-storage storage bucket acl multipart object s3 retention signature versioning archived
+tags: retention endpoint object-storage storage bucket acl multipart object amazon-s3 retention signature versioning archived
 dates:
   validation: 2024-05-06
 categories:
@@ -15,7 +15,7 @@ categories:
 
 ## Access control list (ACL)
 
-Access control lists (ACL) are subresources attached to buckets and objects. They define which Scaleway users have access to the attached object/bucket, and the type of access they have. Whenever a user makes a request against a resource, s3 checks its ACL and verifies that they have permission to carry out the request.
+Access control lists (ACL) are subresources attached to buckets and objects. They define which Scaleway users have access to the attached object/bucket, and the type of access they have. Whenever a user makes a request against a resource, Object Storage checks its ACL and verifies that they have permission to carry out the request.
 
 ## Bucket
 
@@ -147,7 +147,7 @@ S3 is the de facto Object Storage protocol. Scaleway Object Storage officially s
 
 ## Signature V2, Signature V4
 
-When you send HTTP requests to Object Storage, you sign the requests so that we can identify who sent them. You sign requests with your Scaleway access key, which consists of an access key and a secret key. The two main s3 protocols for authentication are Signature v2 and Signature v4. Signature v4 is more recent and it is the recommended version.
+When you send HTTP requests to Object Storage, you sign the requests so that we can identify who sent them. You sign requests with your Scaleway access key, which consists of an access key and a secret key. The two main Amazon S3 protocols for authentication are Signature v2 and Signature v4. Signature v4 is more recent and it is the recommended version.
 
 ## Storage class
 
