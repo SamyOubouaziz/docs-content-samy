@@ -1,6 +1,6 @@
 import os
 import re
-
+from markdown_it import MarkdownIt
 
 class AddLinkOnFirstConcept:
 
@@ -115,6 +115,8 @@ class AddLinkOnFirstConcept:
       skip_line_result = self.check_if_skip_line(lines_of_file[i], skip_line_toggle, old_string)
       skip_line = skip_line_result[0]
       skip_line_toggle = skip_line_result[1]
+      if skip_line == False:
+         skip_line = self.check_if_concept_formatted(old_string)
       if old_string in lines_of_file[i] and skip_line == False:
       # replace concept once in the line 
           lines_of_file[i] = lines_of_file[i].replace(old_string, new_string, 1)
@@ -122,7 +124,30 @@ class AddLinkOnFirstConcept:
     with open(current_file, "w") as file_to_write:
       file_to_write.writelines(lines_of_file)
     return
+  
 
+  def check_if_concept_formatted(self, old_string):
+    md = MarkdownIt()
+    tokens = md.parse(old_string)
+    
+    for token in tokens:
+        if token.type == 'inline':
+            for child in token.children:
+                if child.type == 'code_inline':
+                    return True
+                elif child.type == 'strong_open':
+                    return True
+                elif child.type == 'em_open':
+                    return True
+                elif child.type == "link_open":
+                    return True
+                elif inside_link and child.type == "text":
+                    # Check if the search_string is within the link text
+                    if old_string in child.content:
+                        return True
+                elif child.type == "link_close":
+                    inside_link = False
+    return False
 
   def replace(self):
       # product = self.select_folder_to_process()

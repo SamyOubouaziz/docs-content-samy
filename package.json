@@ -21,7 +21,6 @@
     ]
   },
   "devDependencies": {
-
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
     "husky": "^8.0.3",
@@ -32,5 +31,8 @@
     "prepare": "husky install",
     "check-slugs": "bin/list-invalid-slugs",
     "format": "yarn run prettier --config .prettierrc --write \"**/*.json\""
+  },
+  "dependencies": {
+    "markdown-it": "^14.1.0"
   }
 }
